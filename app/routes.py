@@ -67,20 +67,48 @@ async def dohvati_knjigu(knjiga_id: str, db=Depends(get_database)):
         raise HTTPException(status_code=404, detail="Knjiga nije pronađena")
     return knjiga
 
-#dohvacanje knjige sa stranice libristo, naslov knjige
-@router.get("/scrape-knjiga/{naslov_knjige}")
-async def scrape_knjiga(naslov_knjige: str):
+# scrappanje html-a sa stranice libristo, kako bi se prikupili podaci o knjigama
+rezultati = []
+for stranica in range(1, 6):
+
+    # Kreiranje URL-a za svaku stranicu, nije isti kao na #1 stranici jer se mijenja broj stranica ovisno o broju stranice koji se nalazi
+
+    url = f"https://www.libristo.hr/hr/knjige-na-engleskom#form=B/stranica={stranica}"
+
     try:
-        url = f"https://www.libristo.hr/hr/knjige-na-engleskom{naslov_knjige}"  # Primjer URL-a
+        # Dohvacanje HTML stranicu
         response = requests.get(url)
+        response.raise_for_status()  # Provjera jesu li dohvaćeni podaci uspješno
 
-        if response.status_code == 200:
-            soup = BeautifulSoup(response.text, 'html.parser')
-            
-            # Kasnije implementirati logiku za dohvaćanje podataka o knjizi
+        #BeautifulSoup objekt za analizu HTML-a
+        soup = BeautifulSoup(response.text, 'html.parser')
 
-            return {"naslov": naslov_knjige, "ostali_podaci": "Podaci o knjizi..."}
-        else:
-            raise HTTPException(status_code=404, detail="Stranica nije pronađena")
-    except RequestException as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        # Pronalaze se elementi koji predstavljaju knjige na stranici
+        knjige = soup.find_all("div", class_="c-product-preview")
+
+            # Iteriraj kroz pronađene knjige i izdvoji informacije
+        for knjiga in knjige:
+
+            # Pronađi naslov knjige
+            naslov_element = knjiga.find("h3").find("a")
+            naslov = naslov_element.text.strip() if naslov_element else None
+
+            # Pronađi ime autora
+            autor_element = knjiga.find("p", class_="c-product-preview--content").find("i")
+            autor = autor_element.text.strip() if autor_element else None
+
+            # Pronađi cijenu
+            cijena_element = knjiga.find("p", class_="c-price ")
+            cijena = cijena_element.text.strip() if cijena_element else None
+
+            # Kasnije ovdje moram dodati kako će se pohranjivati pronađene informacije
+            rezultati.append({"naslov": naslov, "autor": autor, "cijena": cijena})
+
+    except requests.exceptions.RequestException as e:
+        print(f"Greška pri dohvaćanju stranice {url}: {str(e)}")
+
+# Ispis rezultata
+for idx, rezultat in enumerate(rezultati, start=1):
+    print(f"{idx}. Naslov: {rezultat['naslov']}, Autor: {rezultat['autor']}, Cijena: {rezultat['cijena']}")
+
+
