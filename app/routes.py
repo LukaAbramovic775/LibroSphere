@@ -73,7 +73,7 @@ async def dohvati_knjige_po_autoru(autor: str, db=Depends(get_database)):
     knjige = await db["knjige"].find({"autor": autor}).to_list(length=None)
     return knjige
 
-# scrappanje html-a sa stranice libristo, kako bi se prikupili podaci o knjigama
+# scrappanje html-a sa stranice libristo, kako bi se prikupili podaci o opcenitim knjigama
 @router.get("/scrape-and-save", response_model=list)
 async def scrape_and_save_to_db():
     scraped_and_saved_data = []
@@ -122,3 +122,41 @@ async def scrape_and_save_to_db():
 
 
 
+# Nova ruta za scrapiranje knjiga sa temom bazama podataka
+@router.get("/scrape-book-databases", response_model=List[Knjiga])
+async def scrape_databases_and_save_to_db(db=Depends(get_database)):
+    scraped_books_database = []
+
+    # Kolekcija za knjige o bazama podataka
+    kolekcija_baza_podataka = db["knjige_baza_podataka"]
+
+    # Kreiranje URL-a za traženje knjiga o bazama podataka
+    url = "https://www.libristo.hr/hr/knjige-na-engleskom/databases#form=B/stranica=1"
+
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        knjige = soup.find_all("div", class_="c-product-preview")
+
+        for knjiga in knjige:
+            naslov_element = knjiga.find("h3").find("a")
+            naslov = naslov_element.text.strip() if naslov_element else None
+
+            autor_element = knjiga.find("p", class_="c-product-preview--content").find("i")
+            autor = autor_element.text.strip() if autor_element else None
+
+            cijena_element = knjiga.find("p", class_="c-price ")
+            cijena = cijena_element.text.strip() if cijena_element else None
+
+            knjiga_info = {"naslov": naslov, "autor": autor, "cijena": cijena}
+
+            await kolekcija_baza_podataka.insert_one(knjiga_info)
+            scraped_books_database.append(knjiga_info)
+
+    except requests.exceptions.RequestException as e:
+        print(f"Greška pri dohvaćanju stranice {url}: {str(e)}")
+
+    return scraped_books_database
