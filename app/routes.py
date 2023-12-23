@@ -73,6 +73,14 @@ async def dohvati_knjige_po_autoru(autor: str, db=Depends(get_database)):
     knjige = await db["knjige"].find({"autor": autor}).to_list(length=None)
     return knjige
 
+# Nova ruta za dohvaćanje knjiga o bazama podataka
+@router.get("/knjige-baza-podataka", response_model=List[Knjiga])
+async def dohvati_knjige_baza_podataka(db=Depends(get_database)):
+    kolekcija_baza_podataka = db["knjige_baza_podataka"]
+    knjige_baza_podataka = await kolekcija_baza_podataka.find().to_list(length=None)
+    return knjige_baza_podataka
+
+
 # scrappanje html-a sa stranice libristo, kako bi se prikupili podaci o opcenitim knjigama
 @router.get("/scrape-and-save", response_model=list)
 async def scrape_and_save_to_db():
