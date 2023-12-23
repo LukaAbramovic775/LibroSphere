@@ -138,33 +138,34 @@ async def scrape_databases_and_save_to_db(db=Depends(get_database)):
     # Kolekcija za knjige o bazama podataka
     kolekcija_baza_podataka = db["knjige_baza_podataka"]
 
-    # Kreiranje URL-a za traženje knjiga o bazama podataka
-    url = "https://www.libristo.hr/hr/knjige-na-engleskom/databases#form=B/stranica=1"
+    for stranica in range(1, 4):  #  prve 3 stranice
+        # Kreiranje URL-a za svaku stranicu
+        url = f"https://www.libristo.hr/hr/knjige-na-engleskom/databases#form=B/stranica={stranica}"
 
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
 
-        soup = BeautifulSoup(response.text, 'html.parser')
+            soup = BeautifulSoup(response.text, 'html.parser')
 
-        knjige = soup.find_all("div", class_="c-product-preview")
+            knjige = soup.find_all("div", class_="c-product-preview")
 
-        for knjiga in knjige:
-            naslov_element = knjiga.find("h3").find("a")
-            naslov = naslov_element.text.strip() if naslov_element else None
+            for knjiga in knjige:
+                naslov_element = knjiga.find("h3").find("a")
+                naslov = naslov_element.text.strip() if naslov_element else None
 
-            autor_element = knjiga.find("p", class_="c-product-preview--content").find("i")
-            autor = autor_element.text.strip() if autor_element else None
+                autor_element = knjiga.find("p", class_="c-product-preview--content").find("i")
+                autor = autor_element.text.strip() if autor_element else None
 
-            cijena_element = knjiga.find("p", class_="c-price ")
-            cijena = cijena_element.text.strip() if cijena_element else None
+                cijena_element = knjiga.find("p", class_="c-price ")
+                cijena = cijena_element.text.strip() if cijena_element else None
 
-            knjiga_info = {"naslov": naslov, "autor": autor, "cijena": cijena}
+                knjiga_info = {"naslov": naslov, "autor": autor, "cijena": cijena}
 
-            await kolekcija_baza_podataka.insert_one(knjiga_info)
-            scraped_books_database.append(knjiga_info)
+                await kolekcija_baza_podataka.insert_one(knjiga_info)
+                scraped_books_database.append(knjiga_info)
 
-    except requests.exceptions.RequestException as e:
-        print(f"Greška pri dohvaćanju stranice {url}: {str(e)}")
+        except requests.exceptions.RequestException as e:
+            print(f"Greška pri dohvaćanju stranice {url}: {str(e)}")
 
     return scraped_books_database
