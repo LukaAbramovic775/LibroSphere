@@ -1,5 +1,6 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr,  validator
 from typing import List
+
 
 # Model klase za Knjigu
 class Knjiga(BaseModel):
@@ -11,6 +12,18 @@ class Knjiga(BaseModel):
     godina_izdanja: int
     broj_stranica: int
     opis: str
+
+    @validator('cijena')
+    def cijena_mora_biti_pozitivan_broj(cls, v):
+        if v <= 0:
+            raise ValueError('Cijena mora biti pozitivan broj')
+        return v
+    
+    @validator('godina_izdanja')
+    def godina_izdanja_ne_smije_biti_u_buducnosti(cls, v):
+        if v > 2025:  # Zamijenite 2024 sa stvarnom trenutnom godinom
+            raise ValueError('Godina izdanja ne smije biti u budućnosti')
+        return v
 
 # Modelklase za Korisnika
 class KorisnikCreate(BaseModel):
