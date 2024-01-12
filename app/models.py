@@ -8,10 +8,7 @@ class Knjiga(BaseModel):
     autor: str
     zanr: str
     cijena: float
-    isbn: str
     godina_izdanja: int
-    broj_stranica: int
-    opis: str
 
     @validator('cijena')
     def cijena_mora_biti_pozitivan_broj(cls, v):

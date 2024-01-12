@@ -51,12 +51,23 @@ def get_database():
 #     access_token = create_access_token(data={"sub": korisnik["email"]})
 #     return access_token """
 
-# Narudzbe
+# Narudzbe izmjena 12.01
 @router.post("/narudzbe", response_model=Narudzba)
 async def kreiraj_narudzbu(narudzba: Narudzba, db=Depends(get_database)):
+
+    # Provjera dostupnosti knjiga
+    for knjiga_id in narudzba.knjige:
+        knjiga = await db["knjige"].find_one({"_id": knjiga_id})
+        if not knjiga:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Knjiga s ID-om {knjiga_id} nije pronađena.")
+        
+    if narudzba.ukupna_cijena <= 0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Ukupna cijena mora biti pozitivan broj")
+
     narudzba_doc = narudzba.dict()
     result = await db["narudzbe"].insert_one(narudzba_doc)
     return {**narudzba_doc, "_id": result.inserted_id}
+
 
 # postanje knjiga
 @router.post("/knjige/unesi-po-imenu", response_model=Knjiga)
