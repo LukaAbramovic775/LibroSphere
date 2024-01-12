@@ -64,7 +64,7 @@ async def kreiraj_narudzbu(narudzba: Narudzba, db=Depends(get_database)):
     if narudzba.ukupna_cijena <= 0:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Ukupna cijena mora biti pozitivan broj")
 
-    narudzba_doc = narudzba.dict()
+    narudzba_doc = narudzba.model_dump()
     result = await db["narudzbe"].insert_one(narudzba_doc)
     return {**narudzba_doc, "_id": result.inserted_id}
 
@@ -72,19 +72,19 @@ async def kreiraj_narudzbu(narudzba: Narudzba, db=Depends(get_database)):
 # postanje knjiga
 @router.post("/knjige/unesi-po-imenu", response_model=Knjiga)
 async def unesi_knjigu_po_imenu(knjiga: Knjiga, db=Depends(get_database)):
-    result = await db["knjige"].insert_one(knjiga.dict())
-    return {**knjiga.dict(), "_id": result.inserted_id}
+    result = await db["knjige"].insert_one(knjiga.model_dump())
+    return {**knjiga.model_dump(), "_id": result.inserted_id}
 
 
 @router.post("/knjige/unesi-po-autoru", response_model=Knjiga)
 async def unesi_knjigu_po_autoru(knjiga: Knjiga, db=Depends(get_database)):
-    result = await db["knjige"].insert_one(knjiga.dict())
-    return {**knjiga.dict(), "_id": result.inserted_id}
+    result = await db["knjige"].insert_one(knjiga.model_dump())
+    return {**knjiga.model_dump(), "_id": result.inserted_id}
 
 @router.post("/knjige/unesi-po-cijeni", response_model=Knjiga)
 async def unesi_knjigu_po_cijeni(knjiga: Knjiga, db=Depends(get_database)):
-    result = await db["knjige"].insert_one(knjiga.dict())
-    return {**knjiga.dict(), "_id": result.inserted_id}
+    result = await db["knjige"].insert_one(knjiga.model_dump())
+    return {**knjiga.model_dump(), "_id": result.inserted_id}
 
 
 # dohvacanje knjiga 
