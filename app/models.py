@@ -4,7 +4,7 @@ from typing import List
 
 # Model klase za Knjigu
 class Knjiga(BaseModel):
-    naziv: str
+    naslov: str
     autor: str
     zanr: str
     cijena: float

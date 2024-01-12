@@ -56,10 +56,10 @@ def get_database():
 async def kreiraj_narudzbu(narudzba: Narudzba, db=Depends(get_database)):
 
     # Provjera dostupnosti knjiga
-    for knjiga_id in narudzba.knjige:
-        knjiga = await db["knjige"].find_one({"_id": knjiga_id})
+    for naslov_knjige in narudzba.knjige:
+        knjiga = await db["knjige"].find_one({"naslov": naslov_knjige})
         if not knjiga:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Knjiga s ID-om {knjiga_id} nije pronađena.")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Knjiga s naslovom {naslov_knjige} nije pronađena.")
         
     if narudzba.ukupna_cijena <= 0:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Ukupna cijena mora biti pozitivan broj")
