@@ -57,7 +57,25 @@ async def kreiraj_narudzbu(narudzba: Narudzba, db=Depends(get_database)):
     result = await db["narudzbe"].insert_one(narudzba_doc)
     return {**narudzba_doc, "_id": result.inserted_id}
 
-# Knjige 
+# postanje knjiga
+@router.post("/knjige/unesi-po-imenu", response_model=Knjiga)
+async def unesi_knjigu_po_imenu(knjiga: Knjiga, db=Depends(get_database)):
+    result = await db["knjige"].insert_one(knjiga.dict())
+    return {**knjiga.dict(), "_id": result.inserted_id}
+
+
+@router.post("/knjige/unesi-po-autoru", response_model=Knjiga)
+async def unesi_knjigu_po_autoru(knjiga: Knjiga, db=Depends(get_database)):
+    result = await db["knjige"].insert_one(knjiga.dict())
+    return {**knjiga.dict(), "_id": result.inserted_id}
+
+@router.post("/knjige/unesi-po-cijeni", response_model=Knjiga)
+async def unesi_knjigu_po_cijeni(knjiga: Knjiga, db=Depends(get_database)):
+    result = await db["knjige"].insert_one(knjiga.dict())
+    return {**knjiga.dict(), "_id": result.inserted_id}
+
+
+# dohvacanje knjiga 
 @router.get("/knjige/scraped", response_model=List[Knjiga])
 async def dohvati_scraped_knjige(db=Depends(get_database)):
     scraped_knjige = await db["knjige"].find().to_list(length=None)
