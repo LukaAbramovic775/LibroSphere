@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 import requests
 from typing import List
 from .db import db
+from bson import ObjectId
 
 router = APIRouter()
 def get_database():
@@ -133,9 +134,12 @@ async def scrape_and_save_to_db():
                 # Pronađi cijenu
                 cijena_element = knjiga.find("p", class_="c-price ")
                 cijena = cijena_element.text.strip() if cijena_element else None
+
+                # ObjectId za jedinstveni ID knjige
+                knjiga_id = str(ObjectId())
                 
                 # Create a dictionary for the book information
-                knjiga_info = {"naslov": naslov, "autor": autor, "cijena": cijena}
+                knjiga_info = {"_id": knjiga_id,"naslov": naslov, "autor": autor, "cijena": cijena}
 
                 # Napravljeno spremanje informacije knjiga u bazu
                 await db["knjige"].insert_one(knjiga_info)
