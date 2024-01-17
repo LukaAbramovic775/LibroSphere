@@ -27,7 +27,6 @@ class Korisnik(BaseModel):
 
 # Model klase za Narudžbu
 class Narudzba(BaseModel):
-    korisnik_id: str
     knjige: List[str]  # Lista ID-ova knjiga
     ukupna_cijena: float
 

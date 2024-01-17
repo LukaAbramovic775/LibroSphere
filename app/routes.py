@@ -68,6 +68,11 @@ async def kreiraj_narudzbu(narudzba: Narudzba, db=Depends(get_database)):
     result = await db["narudzbe"].insert_one(narudzba_doc)
     return {**narudzba_doc, "_id": result.inserted_id}
 
+@router.get("/narudzbe", response_model=List[Narudzba])
+async def dohvati_narudzbe(db=Depends(get_database)):
+    narudzbe = await db["narudzbe"].find().to_list(length=None)
+    return narudzbe
+
 
 # postanje knjiga
 @router.post("/knjige/unesi-po-imenu", response_model=Knjiga)
