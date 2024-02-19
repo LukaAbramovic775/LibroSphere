@@ -15,42 +15,6 @@ router = APIRouter()
 def get_database():
     return db.mongodb
 
-# """ # Registracija novog korisnika
-# @router.post("/registracija", response_model=Korisnik)
-# async def registriraj_korisnika(korisnik: KorisnikCreate, db=Depends(get_database)):
-#     # Provjera postoji li već korisnik s tim emailom
-#     if await db["korisnici"].find_one({"email": korisnik.email}):
-#         raise HTTPException(
-#             status_code=status.HTTP_400_BAD_REQUEST,
-#             detail="Email već postoji"
-#         )
-
-#     # Hashiranje lozinke
-#     hashed_lozinka = get_password_hash(korisnik.lozinka)
-#     korisnik_dict = korisnik.dict()
-#     korisnik_dict["hashed_password"] = hashed_lozinka
-#     del korisnik_dict["lozinka"]  # Uklanjanje obične lozinke
-
-#     # Spremanje korisnika u bazu
-#     result = await db["korisnici"].insert_one(korisnik_dict)
-#     novi_korisnik = await db["korisnici"].find_one({"_id": result.inserted_id})
-#     return Korisnik(email=novi_korisnik["email"], id=str(novi_korisnik["_id"]))
-
-# # Prijavljivanje korisnika
-# @router.post("/prijava", response_model=str)
-# async def prijavi_korisnika(email: str, lozinka: str, db=Depends(get_database)):
-#     korisnik = await db["korisnici"].find_one({"email": email})
-    
-#     if korisnik is None or not verify_password(lozinka, korisnik["hashed_password"]):
-#         raise HTTPException(
-#             status_code=status.HTTP_401_UNAUTHORIZED,
-#             detail="Neispravni kredencijali"
-#         )
-
-#     # Kreiranje JWT tokena
-#     access_token = create_access_token(data={"sub": korisnik["email"]})
-#     return access_token """
-
 # Narudzbe izmjena 12.01
 @router.post("/narudzbe", response_model=Narudzba)
 async def kreiraj_narudzbu(narudzba: Narudzba, db=Depends(get_database)):
@@ -115,6 +79,20 @@ async def dohvati_knjige_baza_podataka(db=Depends(get_database)):
     knjige_baza_podataka = await kolekcija_baza_podataka.find().to_list(length=None)
     return knjige_baza_podataka
 
+#Route za brisanje odredjene knjige 
+
+@router.delete("/knjige/obrisi-po-imenu", response_model=dict)
+async def obrisi_knjigu_po_imenu(naslov: str, db=Depends(get_database)):
+
+    knjiga = await db["knjige"].find_one({"naslov": naslov})
+    
+    if knjiga:
+        await db["knjige"].delete_one({"naslov": naslov})
+
+        return {"message": f"Knjiga s naslovom {naslov} je uspješno obrisana."}
+    else:
+        raise HTTPException(status_code=404, detail=f"Knjiga s naslovom {naslov} nije pronađena.")
+    
 
 # scrappanje html-a sa stranice libristo, kako bi se prikupili podaci o opcenitim knjigama
 @router.get("/scrape-and-save", response_model=list)
