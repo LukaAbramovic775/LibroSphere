@@ -1,8 +1,7 @@
 from motor.motor_asyncio import AsyncIOMotorClient
-
 class DataBase:
-    client: AsyncIOMotorClient = None
-    mongodb: AsyncIOMotorClient = None
+   client = None
+   mongodb = None
 
 db = DataBase()
 
