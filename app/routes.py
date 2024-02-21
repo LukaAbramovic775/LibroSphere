@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from .models import KorisnikCreate, Korisnik
 from .db import get_database
 from .models import Knjiga, KorisnikCreate, Korisnik, Narudzba
-# from .security import get_password_hash, verify_password, create_access_token
 from bson import ObjectId
 from requests.exceptions import RequestException
 from bs4 import BeautifulSoup
@@ -62,15 +61,23 @@ async def dohvati_scraped_knjige(db=Depends(get_database)):
     scraped_knjige = await db["knjige"].find().to_list(length=None)
     return scraped_knjige
 
-@router.get("/knjige/cijena", response_model=List[Knjiga])
-async def dohvati_knjige_prema_cijeni(min_cijena: float = Query(...), max_cijena: float = Query(...), db=Depends(get_database)):
-    knjige = await db["knjige"].find({"cijena": {"$gte": min_cijena, "$lte": max_cijena}}).to_list(length=None)
-    return knjige
+#dohvacanje top 10 najjeftinijih knjiga
+@router.get("/knjige/najjeftinije", response_model=List[str])
+async def dohvati_najjeftinije_knjige(db=Depends(get_database)):
+    najjeftinije_knjige = await db["knjige"].find().sort("cijena", 1).limit(10).to_list(length=None)
+    top_jeftine_knjige = [knjiga["naslov"] for knjiga in najjeftinije_knjige]
+    return top_jeftine_knjige
 
 @router.get("/knjige/autor", response_model=List[Knjiga])
 async def dohvati_knjige_po_autoru(autor: str, db=Depends(get_database)):
     knjige = await db["knjige"].find({"autor": autor}).to_list(length=None)
     return knjige
+
+#dohvacanje 10 nasjkupljih
+@router.get("/knjige/najskuplje", response_model=List[Knjiga])
+async def dohvati_najskuplje_knjige(db=Depends(get_database)):
+    najskuplje_knjige = await db["knjige"].find().sort("cijena", -1).limit(10).to_list(length=None)
+    return najskuplje_knjige
 
 # Nova ruta za dohvaćanje knjiga o bazama podataka
 @router.get("/knjige-baza-podataka", response_model=List[Knjiga])
