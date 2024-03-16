@@ -2,3 +2,5 @@ __pycache__
 .dockerignore
 .docker
 .git
+venv
+.vscode
