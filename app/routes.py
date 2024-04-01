@@ -58,8 +58,8 @@ async def unesi_knjigu_po_cijeni(knjiga: Knjiga, db=Depends(get_database)):
 # dohvacanje knjiga 
 @router.get("/knjige/scraped", response_model=List[Knjiga])
 async def dohvati_scraped_knjige(db=Depends(get_database)):
-    scraped_knjige = await db["knjige"].find().to_list(length=None)
-    return scraped_knjige
+    knjiga_info = await db["knjige"].find().to_list(length=None)
+    return knjiga_info
 
 #dohvacanje top 10 najjeftinijih knjiga
 @router.get("/knjige/najjeftinije", response_model=List[str])
