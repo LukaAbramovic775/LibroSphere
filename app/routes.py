@@ -9,8 +9,20 @@ import requests
 from typing import List
 from .db import db
 from bson import ObjectId
+from pymongo import MongoClient
 
 router = APIRouter()
+username = "admin"
+password = "admin"
+auth_source = "admin"
+custom_endpoint_url = "mongodb://mongodb:27017"
+
+
+client = MongoClient(custom_endpoint_url,
+                     username=username,
+                     password=password,
+                     authSource=auth_source)
+
 def get_database():
     return db.mongodb
 
